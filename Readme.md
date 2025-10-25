@@ -156,5 +156,5 @@ Start → Google Sheets (Orders)
 
 **Dktr Dee**
 Automation | Cybersecurity | Self-Improvement
-📍 [LinkedIn](https://www.linkedin.com/in/zalanlykos/) | 💻 [GitHub](github.com/ZalanLykos)
+📍 [LinkedIn](https://www.linkedin.com/in/zalanlykos/) | 💻 [GitHub](https://github.com/ZalanLykos/)
 
