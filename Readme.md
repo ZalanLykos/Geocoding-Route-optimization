@@ -154,7 +154,7 @@ Start → Google Sheets (Orders)
 
 ## 👤 Author
 
-**Dktr Dee**
-Automation | Cybersecurity | Self-Improvement
+**Zalan Lykos**
+Automation | Cybersecurity | Business Consulting
 📍 [LinkedIn](https://www.linkedin.com/in/zalanlykos/) | 💻 [GitHub](https://github.com/ZalanLykos/)
 
