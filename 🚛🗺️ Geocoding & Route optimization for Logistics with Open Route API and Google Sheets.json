@@ -1,0 +1,1575 @@
+{
+  "name": "🚛🗺️ Geocoding & Route optimization for Logistics with Open Route API and Google Sheets",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "32f84996-0480-4c0b-aab7-3f5ebca9dd4e",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -64,
+        528
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA",
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "eac06796-f40d-4c94-96b2-4ad672053295",
+      "name": "Collect Addresses",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        144,
+        528
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.openrouteservice.org/geocode/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjVmNGYwMTQyYmNiNDQxNDFhYTBlYzg2MGY3ZDAwOTNkIiwiaCI6Im11cm11cjY0In0="
+            },
+            {
+              "name": "text",
+              "value": "={{ $json['address '] }}"
+            },
+            {
+              "name": "boundary.country",
+              "value": "={{ $json['country '] }}"
+            },
+            {
+              "name": "sources",
+              "value": "openstreetmap"
+            },
+            {
+              "name": "size",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "13198c2c-cdca-4a5e-893a-1fac24090f33",
+      "name": "Query Open Route API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        576,
+        512
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "d0ad6f7e-8049-45c4-8022-8c16a8f71392",
+      "name": "Loop Over Addresses",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        336,
+        528
+      ],
+      "typeVersion": 3,
+      "alwaysOutputData": false,
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA",
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Addresses').item.json.id }}",
+            "latitude": "={{ $json.latitude }}",
+            "longitude": "={{ $json.longitude }}",
+            "localadmin": "={{ $json.localadmin }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "country",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "country",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "address",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "address",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "longitude",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "longitude",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "latitude",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "latitude",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "borough",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "borough",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "neighbourhood",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "neighbourhood",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "localadmin",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "localadmin",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": true,
+              "required": false,
+              "displayName": "row_number",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "c84f27c6-3905-455a-b8a7-bb1d6bffafe0",
+      "name": "Save Results",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1024,
+        512
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e4c92077-f294-4e49-8276-20d1441c0c2c",
+              "name": "longitude",
+              "type": "string",
+              "value": "={{ $json.features[0].geometry.coordinates[0] }}"
+            },
+            {
+              "id": "899e5304-e7a1-4ce1-bf9a-f403d74934fb",
+              "name": "latitude",
+              "type": "string",
+              "value": "={{ $json.features[0].geometry.coordinates[1] }}"
+            },
+            {
+              "id": "5b35642b-dda4-42b8-b7bb-1275616bfb59",
+              "name": "borough",
+              "type": "string",
+              "value": "={{ $json.features[0].properties.borough }}"
+            },
+            {
+              "id": "aa74bd9a-f543-48e1-a69b-0e6472bda053",
+              "name": "neighbourhood",
+              "type": "string",
+              "value": "={{ $json.features[0].properties.neighbourhood }}"
+            },
+            {
+              "id": "7f303dc8-4e28-4d46-8e3e-9db00dbcac3a",
+              "name": "localadmin",
+              "type": "string",
+              "value": "={{ $json.features[0].properties.localadmin }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6fa85604-4db7-431d-b0fd-b6cbb1773c12",
+      "name": "Extract Results",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        800,
+        512
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {},
+      "id": "71c85728-f291-4a67-8d0d-8c7fcd38905d",
+      "name": "5 sec",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        1248,
+        704
+      ],
+      "webhookId": "6ecebf96-14ed-4c7b-b467-eb48c143408e",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e2546b17-ed5f-41b9-93ff-5ab132c5a6fd",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        528,
+        976
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "url": "https://api.openrouteservice.org/v2/directions/driving-car",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjVmNGYwMTQyYmNiNDQxNDFhYTBlYzg2MGY3ZDAwOTNkIiwiaCI6Im11cm11cjY0In0="
+            },
+            {
+              "name": "start",
+              "value": "={{ $json.longitude_departure }}, {{ $json.latitude_departure }}"
+            },
+            {
+              "name": "end",
+              "value": "={{ $json.longitude_destination }}, {{ $json.latitude_destination }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json, application/geo+json, application/gpx+xml, img/png; charset=utf-8"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "409c1965-f3fe-4b9f-a60c-0ac1f82372bf",
+      "name": "Request Open Route API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        752,
+        976
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU",
+          "mode": "list",
+          "cachedResultName": "dept",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "393c502c-21b5-417d-b89c-7450d868d0be",
+      "name": "Collect Routes",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        304,
+        976
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4d0acd1a-c049-4353-9fb7-8eb08c138b9c",
+              "name": "distance",
+              "type": "string",
+              "value": "={{ $json.features[0].properties.segments[0].distance }}"
+            },
+            {
+              "id": "2a6ff46a-f620-4dad-a60a-018b8add76d5",
+              "name": "duration",
+              "type": "string",
+              "value": "={{ $json.features[0].properties.segments[0].duration }}"
+            },
+            {
+              "id": "de20932f-4eb5-4372-ad6d-64679df104cb",
+              "name": "n_steps",
+              "type": "number",
+              "value": "={{ $json.features[0].properties.segments[0].steps.length }}"
+            },
+            {
+              "id": "540df5ea-cf63-47cc-8d63-3d6fcac825af",
+              "name": "",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2277677d-ccf2-421e-bbcc-5d3119086b16",
+      "name": "Extract Results1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        976,
+        976
+      ],
+      "notesInFlow": true,
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {},
+      "id": "fd3eeb71-b60d-40d8-a8e4-1096ad41ac0a",
+      "name": "5 sec1",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        1424,
+        1152
+      ],
+      "webhookId": "1c5df276-94b5-42b8-9748-634e389cadcf",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU",
+          "mode": "list",
+          "cachedResultName": "dept",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "city_destination": "={{ $json.localadmin }}",
+            "latitude_destination": "={{ $json.latitude }}",
+            "longitude_destination": "={{ $json.longitude }}",
+            "id": "={{ $json.id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "city_departure",
+              "displayName": "city_departure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "longitude_departue",
+              "displayName": "longitude_departue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "latitude_departure",
+              "displayName": "latitude_departure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city_destination",
+              "displayName": "city_destination",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "longitude_destination",
+              "displayName": "longitude_destination",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "latitude_destination",
+              "displayName": "latitude_destination",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "distance",
+              "displayName": "distance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "duration",
+              "displayName": "duration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "n_steps",
+              "displayName": "n_steps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "01b9c16c-b92c-4154-a0e0-cf24a31548f8",
+      "name": "Save Results2",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1248,
+        512
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "960949e1-2032-4bde-8260-3694f7f2e57c",
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        864,
+        1440
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1tJD4PFr9V4iD-C9CnyhawIgoTQMM7j8ZqoU-C828Agk",
+          "mode": "list",
+          "cachedResultName": "Drivers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tJD4PFr9V4iD-C9CnyhawIgoTQMM7j8ZqoU-C828Agk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tJD4PFr9V4iD-C9CnyhawIgoTQMM7j8ZqoU-C828Agk/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "91f36988-e9fc-47ac-8a4c-66e90ac6a723",
+      "name": "Collect Routes2",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1152,
+        1712
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return one empty item so the workflow continues\nreturn [{}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        112,
+        1344
+      ],
+      "id": "f9dbd02b-e066-4f77-8eaa-7493869d227b",
+      "name": "Continue to next workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return one empty item so the workflow continues\nreturn [{}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        1728
+      ],
+      "id": "9ec2667d-6537-4368-b72c-d1f23a533a7e",
+      "name": "Continue to next workflow2"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.mail }}",
+        "subject": "Logistics Status",
+        "emailType": "text",
+        "message": "=Hello Customer, Your order is out for delivery. \nEstimated time is:{{ $json.duration_human }}\nFor distance:{{ $json.distance_human }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1584,
+        1936
+      ],
+      "id": "7b657a54-e4ca-41fe-b6e7-f3b9f99430c2",
+      "name": "Send mail to client",
+      "webhookId": "89972fd4-3389-4f46-9e1a-128cf9f9677c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "anoHQUWWPzhsxxYs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C09J9SGLZE1",
+          "mode": "list",
+          "cachedResultName": "drivers"
+        },
+        "text": "=Your Route is ready: Driver# {{ $json.id }}:{{ $json.Driver }} \nYour route is {{ $json['Assign Routes'] }}",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1376,
+        1776
+      ],
+      "id": "4fddfb0f-ec2d-42ab-bc23-a8c5f2659c83",
+      "name": "Give Routes to Drivers",
+      "webhookId": "1c1d5b5c-2f90-4053-9117-285120a75f91",
+      "credentials": {
+        "slackApi": {
+          "id": "qzqdEbpXJSNkcmkM",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA",
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "e8f92ca8-beea-47a9-b864-a5537a1f9745",
+      "name": "Collect Order Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1152,
+        1904
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU",
+          "mode": "list",
+          "cachedResultName": "dept",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items').item.json.id }}",
+            "n_steps": "={{ $json.n_steps }}",
+            "distance (Meters)": "={{ $json.distance}}",
+            "duration (Seconds)": "={{ $json.duration}}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "city_departure",
+              "displayName": "city_departure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "longitude_departure",
+              "displayName": "longitude_departure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "latitude_departure",
+              "displayName": "latitude_departure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "city_destination",
+              "displayName": "city_destination",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "longitude_destination",
+              "displayName": "longitude_destination",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "latitude_destination",
+              "displayName": "latitude_destination",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "distance (Meters)",
+              "displayName": "distance (Meters)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration (Seconds)",
+              "displayName": "duration (Seconds)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "n_steps",
+              "displayName": "n_steps",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "570c9094-b31c-4d65-8bd1-9d0f5fbf32f7",
+      "name": "Save Geocode",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1200,
+        976
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA",
+          "mode": "list",
+          "cachedResultName": "Orders",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_3Ato0_hIKrW80JBoN-PjYvTNLjwRFjgAI7RKkS3egA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items').item.json.id }}",
+            "duration (Seconds)": "={{ $('Extract Results1').item.json.duration }}",
+            "distance (Meters)": "={{ $('Extract Results1').item.json.distance }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "country ",
+              "displayName": "country ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "address ",
+              "displayName": "address ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "mail",
+              "displayName": "mail",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "latitude",
+              "displayName": "latitude",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "longitude",
+              "displayName": "longitude",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "localadmin",
+              "displayName": "localadmin",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "distance (Meters)",
+              "displayName": "distance (Meters)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "duration (Seconds)",
+              "displayName": "duration (Seconds)",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "3c8529f0-b878-452f-8d7a-59d71fb3ddc9",
+      "name": "Save Geocode2",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1424,
+        928
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU",
+          "mode": "list",
+          "cachedResultName": "dept",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "36512453-3356-44fd-9acc-cbcc81b5ff63",
+      "name": "Collect Geocode",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        672,
+        1440
+      ],
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1tJD4PFr9V4iD-C9CnyhawIgoTQMM7j8ZqoU-C828Agk",
+          "mode": "list",
+          "cachedResultName": "Drivers",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tJD4PFr9V4iD-C9CnyhawIgoTQMM7j8ZqoU-C828Agk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W8Lxn8CtSQGO1B64WoPPFRqtc0IyUlYBGfR7OlWiIzU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Loop Over Items1').item.json.id }}",
+            "Assign Routes": "={{ $json.mapsUrl }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Driver",
+              "displayName": "Driver",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Assign Routes",
+              "displayName": "Assign Routes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "25dc648e-642e-46d9-bc88-4ba5573cc1e7",
+      "name": "Save Routes",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1296,
+        1456
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.6,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dBUT7sKxDQLW4vOW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over all incoming items\nreturn items.map(item => {\n  const seconds = item.json['duration (Seconds)'] || 0;   // from ORS\n  const meters = item.json['distance (Meters)'] || 0;     // from ORS\n\n  // Convert to human readable duration\n  let duration_human;\n  const minutes = Math.round(seconds / 60);\n\n  if (minutes > 59) {\n    const hours = Math.floor(minutes / 60);\n    const remainingMinutes = minutes % 60;\n    if (remainingMinutes > 0) {\n      duration_human = `${hours}h ${remainingMinutes}m`;\n    } else {\n      duration_human = `${hours}h`;\n    }\n  } else {\n    duration_human = `${minutes} min`;\n  }\n\n  // Convert meters to km\n  const km = (meters / 1000).toFixed(1);\n\n  // Add to the JSON\n  item.json.duration_human = duration_human;\n  item.json.distance_human = `${km} km`;\n\n  return item;\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        1936
+      ],
+      "id": "23602279-6044-4180-9daf-082c3310208c",
+      "name": "Convert Units"
+    },
+    {
+      "parameters": {
+        "jsCode": "const coords = [\n  [$input.first().json.latitude_departure, $input.first().json.longitude_departure], // Start\n  [$input.first().json.latitude_destination, $input.first().json.longitude_destination] // Stop 1\n        // Stop 2\n];\n\nconst mapsUrl = \"https://www.google.com/maps/dir/\" + \n  coords.map(c => `${c[0]},${c[1]}`).join(\"/\") + \"/?dirflg=d\";\n\nreturn [{ json: { mapsUrl } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        1424
+      ],
+      "id": "8b776397-b010-4c36-916f-9d6315140106",
+      "name": "Route Optimization"
+    },
+    {
+      "parameters": {
+        "content": "## 1. Calculate GeoCode\n",
+        "height": 448,
+        "width": 1360,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        448
+      ],
+      "typeVersion": 1,
+      "id": "9b2ef0f5-c55f-4f62-8f06-1364d0d04115",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 2. Calculate ETAs and Distance\n",
+        "height": 448,
+        "width": 1360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        272,
+        912
+      ],
+      "typeVersion": 1,
+      "id": "adda6578-b448-444e-8da6-fb7f8e6f90d0",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 3. Optimize Routes & Send Updates\n",
+        "height": 704,
+        "width": 1152,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        1376
+      ],
+      "typeVersion": 1,
+      "id": "192676b8-5fe9-4e68-8904-3e84368f2b81",
+      "name": "Sticky Note2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "5 sec": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Addresses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Results": {
+      "main": [
+        [
+          {
+            "node": "5 sec",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Results2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Results": {
+      "main": [
+        [
+          {
+            "node": "Save Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Addresses": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Addresses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Addresses": {
+      "main": [
+        [
+          {
+            "node": "Continue to next workflow",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Query Open Route API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Open Route API": {
+      "main": [
+        [
+          {
+            "node": "Extract Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Collect Addresses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Request Open Route API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Open Route API": {
+      "main": [
+        [
+          {
+            "node": "Extract Results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Routes": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Results1": {
+      "main": [
+        [
+          {
+            "node": "Save Geocode",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "5 sec1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Continue to next workflow2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Route Optimization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Routes2": {
+      "main": [
+        [
+          {
+            "node": "Give Routes to Drivers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue to next workflow": {
+      "main": [
+        [
+          {
+            "node": "Collect Geocode",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Collect Routes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue to next workflow2": {
+      "main": [
+        [
+          {
+            "node": "Collect Routes2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Collect Order Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Order Status": {
+      "main": [
+        [
+          {
+            "node": "Convert Units",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Geocode": {
+      "main": [
+        [
+          {
+            "node": "5 sec1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Geocode2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Geocode": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Routes": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Units": {
+      "main": [
+        [
+          {
+            "node": "Send mail to client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Optimization": {
+      "main": [
+        [
+          {
+            "node": "Save Routes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c636a0db-5f54-4699-afab-7a1703920494",
+  "meta": {
+    "templateId": "4593",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "ab7d63981a4b61222272c2011e3c2938258b79a97afe6173281c5009bcc2b5ba"
+  },
+  "id": "EPlnMjVlCYkUXgxg",
+  "tags": []
+}
